@@ -45,7 +45,7 @@ exports.handler = async (event) => {
     `;
 
     // Get secrets from environment variables
-    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const token = "8258852892:AAFEnFp-C9kq32zSsXqCSPcsj79igSHiaMI";
     const chatId = process.env.TELEGRAM_CHAT_ID;
 
     if (!token || !chatId) {
@@ -91,3 +91,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
