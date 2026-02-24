@@ -1,15 +1,12 @@
 exports.handler = async (event) => {
-  console.log('✅ Функция вызвана. Метод:', event.httpMethod);
-  console.log('📦 Тело запроса:', event.body);
-  exports.handler = async (event) => {
-  // Разрешаем кросс-доменные запросы (CORS)
+  // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST',
     'Access-Control-Allow-Headers': 'Content-Type',
   };
 
-  // Обработка предварительного запроса OPTIONS (браузер иногда шлёт его)
+  // Preflight OPTIONS request
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -18,7 +15,7 @@ exports.handler = async (event) => {
     };
   }
 
-  // Принимаем только POST
+  // Only POST allowed
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -28,7 +25,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    // Данные от формы приходят в формате application/x-www-form-urlencoded
+    // Parse form data
     const params = new URLSearchParams(event.body);
     const fio = params.get('fio') || '';
     const phone = params.get('phone') || '';
@@ -36,7 +33,7 @@ exports.handler = async (event) => {
     const date_start = params.get('date_start') || '';
     const date_end = params.get('date_end') || '';
 
-    // Формируем сообщение
+    // Build message
     const message = `
 🚖 Новая заявка с сайта
 
@@ -47,14 +44,15 @@ exports.handler = async (event) => {
 📅 Конец: ${date_end}
     `;
 
-    // Берём токен и chat_id из переменных окружения
+    // Get secrets from environment variables
     const token = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
 
     if (!token || !chatId) {
-      throw new Error('TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is not set');
+      throw new Error('Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID');
     }
 
+    // Send to Telegram
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
     const response = await fetch(url, {
       method: 'POST',
@@ -67,10 +65,10 @@ exports.handler = async (event) => {
 
     const result = await response.json();
     if (!result.ok) {
-      throw new Error(result.description);
+      throw new Error(`Telegram error: ${result.description}`);
     }
 
-    // Успех — редирект на главную с параметром success
+    // Success – redirect to main page with success flag
     return {
       statusCode: 302,
       headers: {
@@ -80,8 +78,9 @@ exports.handler = async (event) => {
       body: '',
     };
   } catch (error) {
-    console.error('Ошибка:', error.message);
-    // Ошибка — редирект на главную с параметром error
+    console.error('Error:', error.message);
+
+    // Failure – redirect with error flag
     return {
       statusCode: 302,
       headers: {
@@ -92,4 +91,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
