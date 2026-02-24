@@ -1,4 +1,7 @@
 exports.handler = async (event) => {
+  console.log('✅ Функция вызвана. Метод:', event.httpMethod);
+  console.log('📦 Тело запроса:', event.body);
+  exports.handler = async (event) => {
   // Разрешаем кросс-доменные запросы (CORS)
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -89,3 +92,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
